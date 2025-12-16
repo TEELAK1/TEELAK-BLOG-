@@ -1,54 +1,44 @@
-# Blogmota – Personal Blog Platform
+# Blogmota Deployment Documentation
 
-A full-stack personal blog platform built with Django, following a clean MVT architecture.
+## 1. Project Architecture & Stack
+- **Framework**: Django 5.x (Python)
+- **Database**: 
+  - **Development**: SQLite (local)
+  - **Production**: PostgreSQL (managed by Render)
+- **Frontend**: Bootstrap 5, FontAwesome, Custom CSS
+- **Deployment Platform**: Render.com
+- **Static Files**: Served via WhiteNoise
 
-## Features
+## 2. Security Implementation
+- **SSL/HTTPS**: Enforced via Django settings (`SECURE_SSL_REDIRECT`).
+- **Secret Management**: `SECRET_KEY` and `DEBUG` mode managed via Environment Variables.
+- **Headers**: HSTS, XSS Protection, and Content-Type sniffing protection enabled.
+- **Database**: Connection strings configured via `dj-database-url`.
+- **RBAC**: Custom permissions ensuring users can only edit their own content.
 
-- CRUD for blog posts with rich-text content (CKEditor)
-- Categories and tags
-- Featured images and publish scheduling
-- Draft/Published status
-- Comments linked to posts and users
-- Full Django authentication (register, login, logout)
-- Admin-only content management
-- Site-wide search (title, content, categories, tags)
+## 3. Deployment Steps
+1. **Push to GitHub**: Ensure the latest code is on the main branch.
+2. **Render Dashboard**:
+   - Create a new **Blueprint**.
+   - Connect your GitHub repository.
+   - Render will read `render.yaml` and automatically provision the Service and Database.
+   - Click **Apply**.
+3. **Verification**: Once deployed, visit the provided `.onrender.com` URL.
 
-## Getting Started (Development)
+## 4. Updates & Maintenance
+- **Update Process**:
+  1. Make changes locally.
+  2. Test via `python manage.py runserver`.
+  3. Commit and push: `git push origin main`.
+  4. Render will auto-deploy the new commit.
+- **Database Backups**:
+  - Render performs automatic daily backups for managed PostgreSQL databases.
+  - Manual backups can be triggered from the Render Dashboard.
 
-1. **Create and activate a virtual environment** (recommended).
-2. **Install dependencies**:
+## 5. Logs & Monitoring
+- Logs are available in the **Render Dashboard** under the "Logs" tab of the web service.
+- Django errors are configured to print to `stdout` for easy monitoring.
 
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Apply migrations**:
-
-   ```bash
-   python manage.py migrate
-   ```
-
-4. **Create a superuser** (admin account):
-
-   ```bash
-   python manage.py createsuperuser
-   ```
-
-5. **Run the development server**:
-
-   ```bash
-   python manage.py runserver
-   ```
-
-6. Visit `http://127.0.0.1:8000/` for the blog and `http://127.0.0.1:8000/admin/` for the Django admin.
-
-## Rich Text Editing
-
-This project uses **django-ckeditor** for rich text editing of post content. Ensure static and media files are configured as in `settings.py` and that you run `collectstatic` in production.
-
-## Production Notes (High Level)
-
-- Use **PostgreSQL** instead of SQLite by updating `DATABASES` in `blogmota/settings.py`.
-- Run behind a WSGI/ASGI server such as **Gunicorn** and a reverse proxy like **Nginx**.
-- Configure environment variables for `SECRET_KEY`, database credentials, and `DEBUG`.
-- Serve static and media files from a dedicated storage (e.g., S3, CDN, or Nginx).
+## 6. Future Improvements
+- **Media Storage**: Integrate AWS S3 for persistent user media uploads (currently ephemeral).
+- **Email Service**: Configure SMTP (SendGrid/Mailgun) for password resets and email notifications.
