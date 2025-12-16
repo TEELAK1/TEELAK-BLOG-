@@ -24,7 +24,7 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [".railway.app"]
 RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -79,8 +79,7 @@ ASGI_APPLICATION = "blogmota.asgi.application"
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
+        default=os.environ.get("DATABASE_URL")
     )
 }
 
