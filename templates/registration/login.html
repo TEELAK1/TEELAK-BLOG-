@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Blogmota{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+  <div class="col-md-5 col-lg-4">
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="card-body p-5">
+        <div class="text-center mb-4">
+          <i class="fa-solid fa-right-to-bracket fa-3x text-primary mb-3"></i>
+          <h1 class="h3 fw-bold font-outfit">Welcome Back</h1>
+          <p class="text-muted">Please enter your details to sign in.</p>
+        </div>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <!-- Manual Field Rendering for Login -->
+          <div class="mb-3">
+            <label for="{{ form.username.id_for_label }}"
+              class="form-label fw-bold small text-uppercase text-secondary">Username</label>
+            {{ form.username }}
+            {% for error in form.username.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.password.id_for_label }}"
+              class="form-label fw-bold small text-uppercase text-secondary">Password</label>
+            {{ form.password }}
+            {% for error in form.password.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold">Login</button>
+          </div>
+        </form>
+
+        <div class="text-center mt-4 pt-3 border-top">
+          <p class="text-muted small">Don't have an account? <a href="{% url 'users:signup' %}"
+              class="fw-bold text-decoration-none">Sign Up</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

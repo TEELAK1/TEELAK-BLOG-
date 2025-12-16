@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+
+{% block title %}{{ post.title }} - Blogmota{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+
+    <article class="mb-5">
+      <!-- Header -->
+      <header class="mb-4">
+        <div class="mb-2">
+          {% if post.category %}
+          <a href="{% url 'blog:category_posts' post.category.slug %}"
+            class="badge bg-primary bg-opacity-10 text-primary border border-primary text-decoration-none px-3 py-2">
+            {{ post.category.name }}
+          </a>
+          {% endif %}
+
+          {% if post.is_published %}
+          <!-- Display logic if needed -->
+          {% else %}
+          <span class="badge bg-warning text-dark">Draft</span>
+          {% endif %}
+        </div>
+
+        <h1 class="fw-bolder mb-3 display-4 text-dark font-outfit">{{ post.title }}</h1>
+
+        <div class="d-flex align-items-center text-muted mb-4 border-bottom pb-4">
+          <div class="d-flex align-items-center me-3">
+            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2"
+              style="width: 40px; height: 40px;">
+              <i class="fa-solid fa-user text-primary"></i>
+            </div>
+            <div>
+              <span class="fw-bold text-dark d-block" style="line-height:1.2">{{ post.author.username }}</span>
+              <small>Author</small>
+            </div>
+          </div>
+          <div class="border-start ps-3 ms-3">
+            <i class="fa-regular fa-calendar me-1"></i> {{ post.publish_date|date:'M d, Y' }}
+            <span class="mx-2">&middot;</span>
+            <i class="fa-regular fa-clock me-1"></i> 5 min read
+          </div>
+
+          {% if user.is_staff or user == post.author %}
+          <div class="ms-auto">
+            <a href="{% url 'blog:post_update' post.slug %}" class="btn btn-sm btn-outline-secondary me-1"><i
+                class="fa-solid fa-pen"></i></a>
+            <a href="{% url 'blog:post_delete' post.slug %}" class="btn btn-sm btn-outline-danger"><i
+                class="fa-solid fa-trash"></i></a>
+          </div>
+          {% endif %}
+        </div>
+      </header>
+
+      <!-- Preview Image -->
+      {% if post.featured_image %}
+      <figure class="mb-4 text-center">
+        <img class="img-fluid rounded-4 shadow-lg w-100" src="{{ post.featured_image.url }}" alt="{{ post.title }}"
+          style="max-height: 500px; object-fit: cover;">
+      </figure>
+      {% endif %}
+
+      <!-- Post Content -->
+      <section class="post-content fs-5 mb-5 text-dark" style="line-height: 1.8;">
+        {{ post.content|safe }}
+      </section>
+
+      <!-- Tags -->
+      <section class="mb-5 border-top pt-4">
+        <i class="fa-solid fa-tags text-muted me-2"></i>
+        {% for tag in post.tags.all %}
+        <a href="{% url 'blog:tag_posts' tag.slug %}"
+          class="badge bg-light text-dark border text-decoration-none p-2 me-1 hover-shadow">
+          #{{ tag.name }}
+        </a>
+        {% empty %}
+        <span class="text-muted">No tags</span>
+        {% endfor %}
+      </section>
+    </article>
+
+    <!-- Comments Section -->
+    <section class="mb-5 bg-light p-4 rounded-4 shadow-sm">
+      <h3 class="fw-bold mb-4 font-outfit"><i class="fa-regular fa-comments me-2"></i>Comments ({{ comments|length }})
+      </h3>
+
+      <div class="mb-5">
+        {% for comment in comments %}
+        <div class="d-flex mb-4">
+          <div class="flex-shrink-0">
+            <div
+              class="bg-primary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center fw-bold text-primary"
+              style="width: 50px; height: 50px;">
+              {{ comment.author.username|slice:":1"|upper }}
+            </div>
+          </div>
+          <div class="ms-3 bg-white p-3 rounded-3 shadow-sm w-100 border relative">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <h6 class="fw-bold mb-0 text-dark">{{ comment.author.username }}</h6>
+              <small class="text-muted">{{ comment.created_at|date:'M d, Y' }}</small>
+            </div>
+            <p class="mb-0 text-secondary">{{ comment.content|linebreaksbr }}</p>
+          </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-4 text-muted border border-dashed rounded bg-white">
+          <p class="mb-0">Unless you speak, the web remains silent. Be the first to comment!</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Comment Form -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          {% if user.is_authenticated %}
+          <h5 class="card-title fw-bold mb-3">Leave a Reply</h5>
+          <form method="post" action="{% url 'blog:add_comment' post.slug %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <textarea name="content" cols="40" rows="3" class="form-control bg-light border-0"
+                placeholder="Join the discussion..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary px-4 rounded-pill fw-bold">Post Comment</button>
+          </form>
+          {% else %}
+          <div class="text-center py-3">
+            <p class="mb-3 text-muted">Join the community to leave a comment.</p>
+            <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-primary rounded-pill px-4">Log
+              in</a>
+            <a href="{% url 'users:signup' %}" class="btn btn-primary rounded-pill px-4 ms-2">Sign up</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Related Posts -->
+    {% if related_posts %}
+    <section class="mb-5">
+      <h3 class="fw-bold mb-4 font-outfit">Related Posts</h3>
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for related in related_posts %}
+        <div class="col">
+          <div class="card h-100 border-0 shadow-sm hover-lift">
+            {% if related.featured_image %}
+            <img src="{{ related.featured_image.url }}" class="card-img-top" alt="{{ related.title }}"
+              style="height: 150px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-light" style="height: 150px;"></div>
+            {% endif %}
+            <div class="card-body">
+              <h6 class="card-title fw-bold">
+                <a href="{{ related.get_absolute_url }}" class="text-decoration-none text-dark stretched-link">{{
+                  related.title }}</a>
+              </h6>
+              <small class="text-muted">{{ related.publish_date|date:'M d' }}</small>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

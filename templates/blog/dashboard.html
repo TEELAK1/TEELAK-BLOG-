@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Blogmota{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 dashboard-header">
+  <div>
+    <h1 class="display-6 fw-bold text-dark font-outfit">
+      <i class="fa-solid fa-gauge-high text-primary me-2"></i>Dashboard
+    </h1>
+    <p class="text-muted mb-0">
+      {% if user.is_staff %}
+      Manage all posts across the platform.
+      {% else %}
+      Manage your stories and draft posts.
+      {% endif %}
+    </p>
+  </div>
+  <a href="{% url 'blog:post_create' %}" class="btn btn-primary shadow-sm">
+    <i class="fa-solid fa-plus me-1"></i> New Story
+  </a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light">
+          <tr>
+            <th class="ps-4 py-3 text-muted fw-bold text-uppercase small">Title</th>
+            <th class="py-3 text-muted fw-bold text-uppercase small">Status</th>
+            <th class="py-3 text-muted fw-bold text-uppercase small">Published</th>
+            <th class="py-3 text-muted fw-bold text-uppercase small">Author</th>
+            <th class="pe-4 py-3 text-end text-muted fw-bold text-uppercase small">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in posts %}
+          <tr>
+            <td class="ps-4 py-3">
+              <a href="{{ post.get_absolute_url }}" class="fw-bold text-decoration-none text-dark">{{ post.title }}</a>
+              <div class="small text-muted d-block d-md-none">{{ post.publish_date|date:'M d' }}</div>
+            </td>
+            <td class="py-3">
+              {% if post.status == 'published' %}
+              <span
+                class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3">
+                <i class="fa-solid fa-check me-1"></i> Published
+              </span>
+              {% else %}
+              <span
+                class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3">
+                <i class="fa-solid fa-pen-ruler me-1"></i> Draft
+              </span>
+              {% endif %}
+            </td>
+            <td class="py-3 text-secondary">
+              <i class="fa-regular fa-calendar me-1"></i> {{ post.publish_date|date:'M d, Y' }}
+            </td>
+            <td class="py-3">
+              <div class="d-flex align-items-center">
+                <div
+                  class="bg-primary bg-opacity-10 rounded-circle text-primary fw-bold small d-flex align-items-center justify-content-center me-2"
+                  style="width: 28px; height: 28px;">
+                  {{ post.author.username|slice:":1"|upper }}
+                </div>
+                <span class="text-dark">{{ post.author.username }}</span>
+              </div>
+            </td>
+            <td class="pe-4 py-3 text-end">
+              <a href="{% url 'blog:post_update' post.slug %}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                <i class="fa-solid fa-pen"></i>
+              </a>
+              <a href="{% url 'blog:post_delete' post.slug %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                <i class="fa-solid fa-trash"></i>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-5">
+              <div class="text-muted mb-3"><i class="fa-regular fa-folder-open fa-3x"></i></div>
+              <h5>No posts found</h5>
+              <p class="text-muted">You haven't written any stories yet.</p>
+              <a href="{% url 'blog:post_create' %}" class="btn btn-outline-primary btn-sm">Start Writing</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

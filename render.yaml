@@ -1,0 +1,22 @@
+databases:
+  - name: blogmota-db
+    databaseName: blogmota
+    user: blogmota_user
+
+services:
+  - type: web
+    name: blogmota
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn blogmota.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: blogmota-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: PYTHON_VERSION
+        value: 3.11.0
